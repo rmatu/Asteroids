@@ -14,6 +14,13 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 
 public class Main extends Application {
+    int score;
+    int lifes;
+    private static final int APP_WIDTH = 1200;
+    private static final int APP_HEIGHT = 800;
+    private static final int USER_SPEED = 400;
+    private static final int USER_LIFES = 3;
+
     public static void main(String[] args) {
         try {
             launch(args);
@@ -24,7 +31,51 @@ public class Main extends Application {
         }
     }
 
-    int score;
+    private void spawnAsteroids(ArrayList<Sprite> asteroidList, Sprite spaceship){
+        if(asteroidList.size() == 0){
+            int asteroidCount = 6;
+            for (int n = 0; n < asteroidCount; n++) {
+                Sprite asteroid = new Sprite("images/asteroid.png");
+                double x = 800 * Math.random() - spaceship.position.x;
+                double y = 600 * Math.random() - spaceship.position.y;
+                asteroid.position.set(x,y);
+                double angle = 360 * Math.random();
+                asteroid.velocity.setLength(60);
+                asteroid.velocity.setAngle(angle);
+                asteroidList.add(asteroid);
+            }
+        }
+    }
+
+    private void asteroidHitsTheUser(ArrayList<Sprite> asteroidList, ArrayList<Sprite> explosionList, Sprite spaceship){
+        for (int asteroidNum = 0; asteroidNum < asteroidList.size(); asteroidNum++){
+            Sprite asteroid = asteroidList.get(asteroidNum);
+            if(spaceship.overlaps(asteroid)){
+                Sprite explosion = new Sprite("images/explosion.gif");
+                asteroidList.remove(asteroidNum);
+                explosion.position.x = asteroid.position.x;
+                explosion.position.y = asteroid.position.y;
+                explosionList.add(explosion);
+                lifes--;
+            }
+        }
+    }
+
+
+    private void endGame (int lifes, Sprite spaceship, GraphicsContext context) {
+        if (lifes == 0) {
+            context.setFill(Color.RED);
+            context.setStroke(Color.RED);
+            context.setLineWidth(3);
+            String text = "You died, your score: " + score;
+            int textX = APP_WIDTH/4;
+            int textY = APP_HEIGHT/2;
+            context.fillText(text, textX, textY);
+            context.strokeText(text, textX, textY);
+            spaceship.position.x = 100000;
+            spaceship.position.y = 100000;
+        }
+    }
 
     public void start(Stage mainStage){
         mainStage.setTitle("Asteroids");
@@ -33,7 +84,7 @@ public class Main extends Application {
         Scene mainScene = new Scene(root);
         mainStage.setScene(mainScene);
 
-        Canvas canvas = new Canvas(1200, 800);
+        Canvas canvas = new Canvas(APP_WIDTH, APP_HEIGHT);
         GraphicsContext context = canvas.getGraphicsContext2D();
         root.setCenter(canvas);
 
@@ -82,6 +133,7 @@ public class Main extends Application {
         }
 
         score = 0;
+        lifes = USER_LIFES;
 
         AnimationTimer gameloop = new AnimationTimer() {
             public void handle(long nanotime){
@@ -90,7 +142,7 @@ public class Main extends Application {
                 if (keyPressedList.contains("RIGHT"))
                     spaceship.rotation += 3;
                 if (keyPressedList.contains("UP")) {
-                    spaceship.velocity.setLength(150);
+                    spaceship.velocity.setLength(USER_SPEED);
                     spaceship.velocity.setAngle(spaceship.rotation);
                 } else {
                     spaceship.velocity.setLength(0);
@@ -118,7 +170,10 @@ public class Main extends Application {
                 }
 
                 background.render(context);
-                spaceship.render(context);
+
+                if(lifes > 0){
+                    spaceship.render(context);
+                }
 
                 for (Sprite laser : laserList)
                     laser.render(context);
@@ -126,6 +181,7 @@ public class Main extends Application {
                 for (Sprite asteroid : asteroidList)
                     asteroid.render(context);
 
+                // USER HITS THE ASTEROID
                 for (int laserNum = 0; laserNum < laserList.size(); laserNum++){
                     Sprite laser = laserList.get(laserNum);
                     for (int asteroidNum = 0; asteroidNum < asteroidList.size(); asteroidNum++){
@@ -137,10 +193,13 @@ public class Main extends Application {
                             explosion.position.x = asteroid.position.x;
                             explosion.position.y = asteroid.position.y;
                             explosionList.add(explosion);
-                            score += 100;
+                            score += 10;
                         }
                     }
                 }
+
+                // ASTEROID HITS THE USER
+                asteroidHitsTheUser(asteroidList, explosionList, spaceship);
 
                 for (int n=0; n< explosionList.size(); n++){
                     Sprite explosion = explosionList.get(n);
@@ -152,17 +211,25 @@ public class Main extends Application {
                 for (Sprite explosion : explosionList)
                     explosion.render(context);
 
-                context.setFont(new Font("Arial Black", 48));
-                context.setFill(Color.WHITE);
-                context.setStroke(Color.GREEN);
+                context.setFont(new Font(48));
+                context.setFill(Color.RED);
+                context.setStroke(Color.RED);
                 context.setLineWidth(3);
                 String text = "Score: " + score;
-                int textX = 900;
+                String textLifes = "Lifes: " + lifes;
+                int textX = 800;
                 int textY = 80;
+                int lifesxX = 50;
+                int lifesY = 80;
                 context.fillText(text, textX, textY);
                 context.strokeText(text, textX, textY);
 
+                context.fillText(textLifes, lifesxX, lifesY);
+                context.strokeText(textLifes, lifesxX, lifesY);
 
+                spawnAsteroids(asteroidList, spaceship);
+
+                endGame(lifes, spaceship, context);
             }
         };
 

@@ -7,12 +7,14 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Main extends Application {
     private static final int APP_WIDTH = 1200;
@@ -26,6 +28,10 @@ public class Main extends Application {
     int asteroidAmount = 3;
     boolean canPressSpace = true;
     boolean gameEnded = false;
+    MediaPlayer mediaPlayer;
+    MediaPlayer laserPlayer;
+    MediaPlayer explosionPlayer;
+
 
     public static void main(String[] args) {
         try {
@@ -35,6 +41,28 @@ public class Main extends Application {
         } finally {
             System.exit(0);
         }
+    }
+
+
+    public void music() {
+        String s = "src/sound/space.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        mediaPlayer = new MediaPlayer(h);
+        mediaPlayer.play();
+    }
+
+    public void playLaserSound() {
+        String s = "src/sound/laser.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        laserPlayer = new MediaPlayer(h);
+        laserPlayer.play();
+    }
+
+    public void playExplosionSound() {
+        String s = "src/sound/explosion.wav";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        explosionPlayer = new MediaPlayer(h);
+        explosionPlayer.play();
     }
 
     private void spawnAsteroids(ArrayList<Sprite> asteroidList, Sprite spaceship){
@@ -69,6 +97,7 @@ public class Main extends Application {
                     explosion.position.x = asteroid.position.x;
                     explosion.position.y = asteroid.position.y;
                     explosionList.add(explosion);
+                    playExplosionSound();
                     score += 10;
                 }
             }
@@ -153,6 +182,7 @@ public class Main extends Application {
 
     public void start(Stage mainStage){
         mainStage.setTitle("Asteroids");
+        music();
 
         BorderPane root = new BorderPane();
         Scene mainScene = new Scene(root);
@@ -235,6 +265,7 @@ public class Main extends Application {
                     laser.velocity.setLength(400);
                     laser.velocity.setAngle(spaceship.rotation);
                     laserList.add(laser);
+                    playLaserSound();
                     setTimeout(() -> canPressSpace = true, 300);
                 }
 

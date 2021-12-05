@@ -38,10 +38,6 @@ public class Vector {
 
     }
 
-    public double getAngle(){
-        return Math.toDegrees(Math.atan2(this.y, this.x));
-    }
-
     public void setAngle(double angleDegrees){
         double L = this.getLength();
         double angleRadians = Math.toRadians(angleDegrees);

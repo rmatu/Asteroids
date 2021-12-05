@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -195,6 +196,7 @@ public class Main extends Application {
         ArrayList<String> keyPressedList = new ArrayList<String>();
         ArrayList<String> keyJustPressedList = new ArrayList<String>();
 
+        // logic that prevents user from keeping one button pressed
         mainScene.setOnKeyPressed(
                 (KeyEvent event) -> {
                     String keyName = event.getCode().toString();
@@ -299,9 +301,6 @@ public class Main extends Application {
 
                 // ASTEROID HITS THE USER
                 asteroidHitsTheUser(asteroidList, explosionList, spaceship);
-
-                // LASER HITS THE USER
-//                laserHitsUser(laserList, explosionList, spaceship);
 
                 for (int n=0; n< explosionList.size(); n++){
                     Sprite explosion = explosionList.get(n);
